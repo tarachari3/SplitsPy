@@ -87,4 +87,19 @@ def makeDistMat(df, names = 'plotID', metric='cityblock'):
     return labels, dist
 
 
+def calcDisagree()
+
+def plotDisagree()
+
+
+def fishers() 
+
+def plotFishers()
+
+
+def plotCenterDists()
+
+def plotTimeDists()
+
+
 
