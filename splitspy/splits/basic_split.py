@@ -42,6 +42,19 @@ class Split:
     def separates(self, tax1: int, tax2: int) -> bool:
         return (tax1 in self.part1()) != (tax2 in self.part1())
 
+    def separates_sets(self, tax1: int, tax2: [int]) -> bool:
+        """
+        Parameters :
+        tax1 : Taxa in cycle
+        tax2 : Set of taxa in cycle
+        Returns :
+        Bool is tax1 separated from all of tax2
+        """
+        part12Split = (tax1 in self.part1()) and (all(i in self.part2() for i in tax2))
+        part21Split = (tax1 in self.part2()) and (all(i in self.part1() for i in tax2))
+
+        return (part12Split or part21Split)
+
     def size(self) -> int:
         return min(len(self.part1()), len(self.part2()))
 
@@ -95,7 +108,31 @@ def split_dist(n_tax: int, splits: [Split]) -> [[float]]:
         mat.append(row)
     return mat
 
-#ADD FUNCTION FOR split_dist_sets
+def split_dist_sets(tax1: [int], tax2: [int], splits: [Split]) -> [[float]]:
+    """
+    Parameters :
+    tax1 : Set of taxa in cycle
+    tax2 : Set of taxa in cycle to compare each tax1 against
+    splits: All splits in nnet split system
+    Returns :
+    Distances from each taxa input to split from all taxa in tax2 
+    """
+
+    num_tax = len(tax1)
+    vec = [0]*num_tax
+    i = 0
+
+    for a in tax1:
+        dist = 0
+        # Add all splits were tax1 in part1 and all tax2 in part2
+        for sp in splits:
+            if sp.separates_sets(a, tax2):
+                dist += sp.weight
+
+        vec[i] = dist
+        i += 1
+    
+    return vec
 
 
 def cyc_split(cycle: [int], pos1: int, pos2: int, wgt: float) -> Split:
