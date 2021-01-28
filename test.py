@@ -7,13 +7,6 @@ import numpy as np
 import voteFuncs as vf
 
 import splitspy.nnet.nnet_algo as nnet_algorithm
-#import splitspy.outlines.outline_algo as outline_algorithm
-#import splitspy.nnet.distances as distances
-#from splitspy.splits.basic_split import split_dist, split_dist_sets
-#from splitspy.graph import draw
-#from splitspy.splits import splits_io
-
-#from subprocess import Popen
 
 
 # Unzip all data
@@ -30,7 +23,7 @@ Sall_votes = pd.read_csv(data_dir+'/Sall_votes_withPartyAndNames.csv')
 
 
 
-#Distance matrix for 116th congress (****CONVERT TO A makeVis FUNCTION****)
+#Distance matrix for 116th congress
 
 cong = 116
 Sall_votes_sub = Sall_votes[Sall_votes.congress == cong]
@@ -41,60 +34,120 @@ voteMat = vf.makeVoteMat(Sall_votes_sub)
 labels, matrix = vf.makeDistMat(voteMat)
 print('Pairwise Distances Calculated')
 
-
 cycle, splits = nnet_algorithm.neighbor_net(labels, matrix)
 print('Cycle and Splits Determined')
 
+im116 = '116th_outline.pdf'
+filename = output_dir+'/'+im116
 
-# graph, angles = outline_algorithm.compute(labels, cycle, splits, rooted=False, out_grp="", alt=False)
-# print('Graph and Angles Determined')
+nexus_file = output_dir+'/dist_116th.nex'
 
+vf.makeVis(labels,cycle,splits,matrix,filename,nexus_file)
 
-# fit = distances.ls_fit(matrix, split_dist(len(labels), splits))
-
-# im116 = 'test_outline.pdf'
-# draw.draw(output_dir+'/'+im116, graph, angles, fit, width = 1000, height = 800,m_left = 100, m_right = 100, m_top = 100, m_bot = 100, font_size = 12, scale_factor =5)
-# print('Graph Image Generated')
-
-# #Show plot
-# filename = output_dir+'/'+im116
-# Popen('open %s' % filename,shell=True)
-
-# #Add code for NEXUS output/SplitsTree5 compatible output
-# nexus_file = output_dir+'/dist_116th.nex'
-# splits_io.print_splits_nexus(labels, splits, cycle, fit, filename=nexus_file)
 
 
 # Calculate distances from 'center' for all members
 demDists, repDists = vf.centerDists(labels, splits)
+#Plot (scatter func)
+df = pd.DataFrame()
+df['dist'] = list(demDists) + list(repDists)
+df['party'] = list(np.repeat('Dem',len(demDists))) + list(np.repeat('Rep',len(repDists)))
+df['names'] = [y for y in labels if '_Rep' not in y] + [y for y in labels if '_Rep' in y]
+imDists = '116_dists.pdf'
+filename = output_dir+'/'+imDists
+vf.plotScatter(df, 'names', 'dist', c = 'party', colors = {'Dem': "#0392cf", 'Rep': "#ee4035"},outfile= filename, xaxis = "Senators", yaxis = "Center Distances", 
+	title="Center Distances of Senators in 116th Session", rotation = 90, show =False)
 
 # Calculate distances from 'center' for list of congresses
+# congs = range(111,117)
+# allDists = pd.DataFrame()
+# dists = []
+# party = []
+# session = []
+# for c in congs:
+
+# 	Sall_votes_sub_2 = Sall_votes[Sall_votes.congress == c]
+# 	voteMat = vf.makeVoteMat(Sall_votes_sub_2)
+
+# 	labels, matrix = vf.makeDistMat(voteMat)
+# 	cycle, splits = nnet_algorithm.neighbor_net(labels, matrix)
+
+# 	demDists, repDists = vf.centerDists(labels, splits)
+# 	dists += list(demDists) + list(repDists)
+# 	party += list(np.repeat('Dem',len(demDists))) + list(np.repeat('Rep',len(repDists)))
+# 	session += list(np.repeat(c,len(list(demDists) + list(repDists))))
+# 	print('Cong '+str(c)+' Processed')
+
+# allDists['dist'] = dists
+# allDists['party'] = party
+# allDists['session'] = session
+
+#PLOT
 
 
-#Within party analysis
-members = ["SANDERS_B_Ind","WARREN_E_Dem","KLOBUCHAR_A_Dem","BOOKER_C_Dem","HARRIS_K_Dem"]
+#Within Dem. party analysis
+
 dem_votes = Sall_votes_sub[Sall_votes_sub.party_code != 200]
 
 voteMat = vf.makeVoteMat(dem_votes)
 
-# labels, matrix = vf.makeDistMat(voteMat)
-# cycle, splits = nnet_algorithm.neighbor_net(labels, matrix)
-# graph, angles = outline_algorithm.compute(labels, cycle, splits, rooted=False, out_grp="", alt=False)
-# fit = distances.ls_fit(matrix, split_dist(len(labels), splits))
-# imDem = 'dem116_outline.pdf'
-# draw.draw(output_dir+'/'+imDem, graph, angles, fit, width = 1000, height = 800,m_left = 100, m_right = 100, m_top = 100, m_bot = 100, font_size = 12, scale_factor =5)
+labels, matrix = vf.makeDistMat(voteMat)
+cycle, splits = nnet_algorithm.neighbor_net(labels, matrix)
 
-# filename = output_dir+'/'+imDem
-# Popen('open %s' % filename,shell=True)
+imDem = 'dem116_outline.pdf'
+filename = output_dir+'/'+imDem
+
+nexus_file = output_dir+'/dem_116th.nex'
+
+vf.makeVis(labels,cycle,splits,matrix,filename,nexus_file,show=False)
 
 
-# disagree = vf.calcDisagree(voteMat, members)
+members = ["SANDERS_B_Ind","WARREN_E_Dem","KLOBUCHAR_A_Dem","BOOKER_C_Dem","HARRIS_K_Dem"]
+members2 = ["MANCHIN_J_Dem","SINEMA_K_Dem","JONES_G_Dem"]
+disagree = vf.calcDisagree(voteMat, members)
 #Plot aggreement with rest of party
+filename = output_dir+'/'+'five_disagree.pdf'
+vf.plotScatter(disagree, 'Rollcall', 'Frac', c = 'Vote', colors = {0.0: "#8DD3C7", 0.5: "#FB8072", 1.0:"#BEBADA"},
+	outfile= filename, xaxis = "Rollcall Number", yaxis = "Fraction Agreement within Party", 
+	title="Agreement Within Party for Sanders, Warren, Klobuchar, Booker, Harris Split", show =True)
 
-# pvals = vf.calcSplitVotPval(voteMat, members)
+pvals = vf.calcSplitVotPval(voteMat, members)
+filename = output_dir+'/'+'five_pvals.pdf'
 #Plot p-values for ranking vote contribution to split
+vf.plotScatter(pvals, 'Rollcall', 'pval',outfile= filename, xaxis = "Rollcall Number", yaxis = "-log10(p-value)", 
+	title="P-values of Vote Contribution to Sanders, Warren, Klobuchar, Booker, Harris Split", show =True)
 
-# rep_votes = Sall_votes_sub[Sall_votes_sub.party_code == 200]
+
+
+disagree = vf.calcDisagree(voteMat, members2)
+filename = output_dir+'/'+'three_disagree.pdf'
+#Plot aggreement with rest of party
+vf.plotScatter(disagree, 'Rollcall', 'Frac', c = 'Vote', colors = {0.0: "#8DD3C7", 0.5: "#FB8072", 1.0:"#BEBADA"},
+	outfile= filename, xaxis = "Rollcall Number", yaxis = "Fraction Agreement within Party", 
+	title="Agreement Within Party for Manchin, Sinema, Jones Split", show =False)
+
+pvals = vf.calcSplitVotPval(voteMat, members2)
+filename = output_dir+'/'+'three_pvals.pdf'
+#Plot p-values for ranking vote contribution to split
+vf.plotScatter(pvals, 'Rollcall', 'pval',outfile= filename, xaxis = "Rollcall Number", yaxis = "-log10(p-value)", 
+	title="P-values of Vote Contribution to Manchin, Sinema, Jones Split", show =False)
+
+
+
+#Within Rep. party analysis
+rep_votes = Sall_votes_sub[Sall_votes_sub.party_code == 200]
+
+voteMat = vf.makeVoteMat(rep_votes)
+
+labels, matrix = vf.makeDistMat(voteMat)
+cycle, splits = nnet_algorithm.neighbor_net(labels, matrix)
+
+imRep = 'rep116_outline.pdf'
+filename = output_dir+'/'+imRep
+
+nexus_file = output_dir+'/rep_116th.nex'
+
+vf.makeVis(labels,cycle,splits,matrix,filename,nexus_file,show=False)
 
 
 

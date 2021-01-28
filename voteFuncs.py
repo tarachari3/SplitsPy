@@ -8,6 +8,7 @@ from scipy.spatial.distance import pdist, squareform
 from FisherExact import fisher_exact
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 import numpy as np
 from itertools import compress
@@ -181,12 +182,12 @@ def calcSplitVotPval(voteMat, members):
         pvalue = fisher_exact([[memZero, memHalf,memOne], [nonMemZero, nonMemHalf,nonMemOne]])
         pvals[i] = pvalue 
 
-    pval_df['pval'] = pvals
+    pval_df['pval'] = -np.log10(pvals)
     pval_df['Rollcall'] = rollcalls 
 
     return pval_df
 
-# def plotFishers()
+
 
 def centerDists(labels, splits):
     """
@@ -210,10 +211,54 @@ def centerDists(labels, splits):
 # def plotTimeDists()
 
 
-# def makeVis(labels,cycle,splits,outfilePhylo,outfileNexus,width....):
+def makeVis(labels,cycle,splits,matrix,outfilePhylo,outfileNexus,show=True,width = 1000, height = 800,m_left = 100, m_right = 100, m_top = 100, m_bot = 100, font_size = 12, scale_factor =5):
+    """
+    Parameters :
+    labels : List of labels for members in dataset
+    cycle : List of circular ordering of labels (members)
+    splits : List of split objects between members
+    matrix : Distance matrix (used as input to nnet)
+    outfilePhylo : Filename for phylogenetic outline image of splits network
+    outfileNexus : Filename for NEXUS output of splits network (SplitsTree compatible)
+    Outputs :
+    Image and NEXUS files for split network
+    """
+
+    graph, angles = outline_algorithm.compute(labels, cycle, splits, rooted=False, out_grp="", alt=False)
+
+    fit = distances.ls_fit(matrix, split_dist(len(labels), splits))
+
+    draw.draw(outfilePhylo, graph, angles, fit, width, height,m_left, m_right, m_top, m_bot, font_size, scale_factor)
+
+    #Show plot
+    if show:
+        Popen('open %s' % outfilePhylo,shell=True)
+
+    #Add code for NEXUS output/SplitsTree5 compatible output
+    splits_io.print_splits_nexus(labels, splits, cycle, fit, filename=outfileNexus)
 
 
+def plotScatter(df, x, y, c = None,colors = None, outfile = "", xaxis = "", yaxis = "", title="", rotation = 0, fontx =10, fonty =10, fontT = 10, fontL = 4, show =True):
+
+    p = sns.scatterplot(data = df, x = x, y = y, hue = c,alpha=0.6, palette = colors)
+
+    p.axes.set_title(title,fontsize=fontT)
+    p.set_xlabel(xaxis,fontsize=fontx)
+    p.set_ylabel(yaxis,fontsize=fonty)
+    p.tick_params(labelsize=fontL,labelrotation=rotation)
+    plt.tight_layout()
+
+    if outfile != "":
+        plt.savefig(outfile)
+        if show:
+            Popen('open %s' % outfile,shell=True)
+    else:   
+        plt.savefig(title+"_out.pdf")
+        if show:
+            Popen('open %s' % title+"_out.pdf",shell=True)
+    plt.clf()
 
 
+#def plotViolins
 
 
