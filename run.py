@@ -59,30 +59,32 @@ vf.plotScatter(df, 'names', 'dist', c = 'party', colors = {'Dem': "#0392cf", 'Re
 	title="Center Distances of Senators in 116th Session", rotation = 90, show =False)
 
 # Calculate distances from 'center' for list of congresses
-# congs = range(111,117)
-# allDists = pd.DataFrame()
-# dists = []
-# party = []
-# session = []
-# for c in congs:
+congs = range(111,117)
+allDists = pd.DataFrame()
+dists = []
+party = []
+session = []
+for c in congs:
 
-# 	Sall_votes_sub_2 = Sall_votes[Sall_votes.congress == c]
-# 	voteMat = vf.makeVoteMat(Sall_votes_sub_2)
+	Sall_votes_sub_2 = Sall_votes[Sall_votes.congress == c]
+	voteMat = vf.makeVoteMat(Sall_votes_sub_2)
 
-# 	labels, matrix = vf.makeDistMat(voteMat)
-# 	cycle, splits = nnet_algorithm.neighbor_net(labels, matrix)
+	labels, matrix = vf.makeDistMat(voteMat)
+	cycle, splits = nnet_algorithm.neighbor_net(labels, matrix)
 
-# 	demDists, repDists = vf.centerDists(labels, splits)
-# 	dists += list(demDists) + list(repDists)
-# 	party += list(np.repeat('Dem',len(demDists))) + list(np.repeat('Rep',len(repDists)))
-# 	session += list(np.repeat(c,len(list(demDists) + list(repDists))))
-# 	print('Cong '+str(c)+' Processed')
+	demDists, repDists = vf.centerDists(labels, splits)
+	dists += list(demDists) + list(repDists)
+	party += list(np.repeat('Dem',len(demDists))) + list(np.repeat('Rep',len(repDists)))
+	session += list(np.repeat(c,len(list(demDists) + list(repDists))))
+	print('Cong '+str(c)+' Processed')
 
-# allDists['dist'] = dists
-# allDists['party'] = party
-# allDists['session'] = session
+allDists['dist'] = dists
+allDists['party'] = party
+allDists['session'] = session
 
 #PLOT
+vf.plotViolin(allDists, 'session', 'dist', c = 'party', colors = {'Dem': "#0392cf", 'Rep': "#ee4035"},outfile= filename, xaxis = "Session", yaxis = "Center Distances", 
+	title="Center Distances of Parties Across Senates", rotation = 90, fontL = 8,show =True)
 
 
 #Within Dem. party analysis
@@ -109,13 +111,13 @@ disagree = vf.calcDisagree(voteMat, members)
 filename = output_dir+'/'+'five_disagree.pdf'
 vf.plotScatter(disagree, 'Rollcall', 'Frac', c = 'Vote', colors = {0.0: "#8DD3C7", 0.5: "#FB8072", 1.0:"#BEBADA"},
 	outfile= filename, xaxis = "Rollcall Number", yaxis = "Fraction Agreement within Party", 
-	title="Agreement Within Party for Sanders, Warren, Klobuchar, Booker, Harris Split", show =True)
+	title="Agreement Within Party for Sanders, Warren, Klobuchar, Booker, Harris Split",fontL = 8, show =True)
 
 pvals = vf.calcSplitVotPval(voteMat, members)
 filename = output_dir+'/'+'five_pvals.pdf'
 #Plot p-values for ranking vote contribution to split
 vf.plotScatter(pvals, 'Rollcall', 'pval',outfile= filename, xaxis = "Rollcall Number", yaxis = "-log10(p-value)", 
-	title="P-values of Vote Contribution to Sanders, Warren, Klobuchar, Booker, Harris Split", show =True)
+	title="P-values of Vote Contribution to Sanders, Warren, Klobuchar, Booker, Harris Split", fontL = 8, show =True)
 
 
 
@@ -124,13 +126,13 @@ filename = output_dir+'/'+'three_disagree.pdf'
 #Plot aggreement with rest of party
 vf.plotScatter(disagree, 'Rollcall', 'Frac', c = 'Vote', colors = {0.0: "#8DD3C7", 0.5: "#FB8072", 1.0:"#BEBADA"},
 	outfile= filename, xaxis = "Rollcall Number", yaxis = "Fraction Agreement within Party", 
-	title="Agreement Within Party for Manchin, Sinema, Jones Split", show =False)
+	title="Agreement Within Party for Manchin, Sinema, Jones Split", fontL = 8, show =False)
 
 pvals = vf.calcSplitVotPval(voteMat, members2)
 filename = output_dir+'/'+'three_pvals.pdf'
 #Plot p-values for ranking vote contribution to split
 vf.plotScatter(pvals, 'Rollcall', 'pval',outfile= filename, xaxis = "Rollcall Number", yaxis = "-log10(p-value)", 
-	title="P-values of Vote Contribution to Manchin, Sinema, Jones Split", show =False)
+	title="P-values of Vote Contribution to Manchin, Sinema, Jones Split", fontL = 8 , show =False)
 
 
 

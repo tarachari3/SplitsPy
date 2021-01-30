@@ -206,9 +206,6 @@ def centerDists(labels, splits):
 
     return demDists, repDists
 
-# def plotCenterDists()
-
-# def plotTimeDists()
 
 
 def makeVis(labels,cycle,splits,matrix,outfilePhylo,outfileNexus,show=True,width = 1000, height = 800,m_left = 100, m_right = 100, m_top = 100, m_bot = 100, font_size = 12, scale_factor =5):
@@ -259,6 +256,25 @@ def plotScatter(df, x, y, c = None,colors = None, outfile = "", xaxis = "", yaxi
     plt.clf()
 
 
-#def plotViolins
+def plotViolin(df, x, y, c = None,colors = None, outfile = "", xaxis = "", yaxis = "", title="", rotation = 0, fontx =10, fonty =10, fontT = 10, fontL = 4, show =True):
+
+    p = sns.violinplot(data = df, x = x, y = y, hue = c,alpha=0.6, palette = colors)
+
+    p.axes.set_title(title,fontsize=fontT)
+    p.set_xlabel(xaxis,fontsize=fontx)
+    p.set_ylabel(yaxis,fontsize=fonty)
+    p.tick_params(labelsize=fontL,labelrotation=rotation)
+    plt.tight_layout()
+
+    if outfile != "":
+        plt.savefig(outfile)
+        if show:
+            Popen('open %s' % outfile,shell=True)
+    else:   
+        plt.savefig(title+"_out.pdf")
+        if show:
+            Popen('open %s' % title+"_out.pdf",shell=True)
+    plt.clf()
+
 
 
