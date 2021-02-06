@@ -141,7 +141,6 @@ def calcDisagree(voteMat, members):
 
     return disagree
 
-#def plotDisagree(agreeMat,)
 
 
 def calcSplitVotPval(voteMat, members):

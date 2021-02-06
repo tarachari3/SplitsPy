@@ -96,7 +96,7 @@ def __join_nodes(n: int, mat: np.array, nodes_head: NetNode) -> [NetNode]:
                         if p.nbr is None and q.nbr is None:
                             d_pq = mat[p.id][q.id]
                         elif p.nbr is not None and q.nbr is None:
-                            d_pq = (mat[p.id][q.id] + mat[p.nbr.id][q.id]) / 2.0
+                            d_pq = (mat[p.id][q.id] + mat[p.nbr.id][q.id]) / 2.0 #Is this where mu is being updated?
                         elif p.nbr is None and q.nbr is not None:
                             d_pq = (mat[p.id][q.id] + mat[p.id][q.nbr.id]) / 2.0
                         else:
@@ -139,7 +139,7 @@ def __join_nodes(n: int, mat: np.array, nodes_head: NetNode) -> [NetNode]:
                 else:
                     d_pq = (mat[p.id][q.id] + mat[p.id][q.nbr.id] + mat[p.nbr.id][q.id] + mat[p.nbr.id][q.nbr.id]) / 4.0
 
-                q_pq = (num_clusters - 2.0) * d_pq - p.Sx - q.Sx
+                q_pq = (num_clusters - 2.0) * d_pq - p.Sx - q.Sx # Standard NJ Formula
 
                 if (c_x is None or (q_pq < best)) and (p.nbr != q):
                     c_x = p
@@ -165,7 +165,7 @@ def __join_nodes(n: int, mat: np.array, nodes_head: NetNode) -> [NetNode]:
         if c_y.nbr is not None:
             m += 1
 
-        best = (m - 2.0) * mat[c_x.id][c_y.id] - c_x.Rx - c_y.Rx
+        best = (m - 2.0) * mat[c_x.id][c_y.id] - c_x.Rx - c_y.Rx # Node selection criteria
         if c_x.nbr is not None:
             q_pq = (m - 2.0) * mat[c_x.nbr.id][c_y.id] - c_x.nbr.Rx - c_y.Rx
             if q_pq < best:
@@ -214,6 +214,7 @@ def __join2way(x: NetNode, y: NetNode) -> None:
 
 def __join3way(x: NetNode, y: NetNode, z: NetNode, joins: [NetNode], mat: np.array, nodes_head: NetNode,
                num_nodes: int) -> NetNode:
+    #Save components of clusters
     u = NetNode(num_nodes + 1)
     u.ch1 = x
     u.ch2 = y
@@ -246,6 +247,7 @@ def __join3way(x: NetNode, y: NetNode, z: NetNode, joins: [NetNode], mat: np.arr
     v.nbr = u
 
     p = nodes_head.next
+    # Distance-Reduction updates (leave as is?, for TSP u(i) = 0 is 2 nbr's...
     while p is not None:
         mat[u.id][p.id] = mat[p.id][u.id] = (2.0 / 3.0) * mat[x.id][p.id] + mat[y.id][p.id] / 3.0
         mat[v.id][p.id] = mat[p.id][v.id] = (2.0 / 3.0) * mat[z.id][p.id] + mat[y.id][p.id] / 3.0
